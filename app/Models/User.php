@@ -12,13 +12,6 @@ class User extends Authenticatable implements JWTSubject
     use HasFactory, Notifiable;
 
     /**
-     * @var mixed|string
-     */
-    public mixed $name;
-    public mixed $email;
-    public mixed $password;
-
-    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
