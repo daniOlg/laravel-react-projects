@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Classes\ApiResponseClass;
+use App\Http\Requests\AuthRequest;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Validator;
 
 
 class AuthController extends Controller
@@ -13,26 +15,19 @@ class AuthController extends Controller
     /**
      * Register a User.
      *
+     * @param AuthRequest $request
      * @return JsonResponse
      */
-    public function register(): JsonResponse
+    public function register(AuthRequest $request): JsonResponse
     {
-        $validator = Validator::make(request()->all(), [
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|confirmed|min:8',
-        ]);
-
-        if($validator->fails()){
-            return response()->json($validator->errors()->toJson(), 400);
-        }
+        $data = $request->validated();
 
         $user = new User;
-        $user->fill(request()->only('name', 'email'));
+        $user->fill($data);
         $user->password = bcrypt(request()->password);
         $user->save();
 
-        return response()->json($user, 201);
+        return ApiResponseClass::sendResponse($user, 'User registered successfully', 201);
     }
 
 
@@ -43,13 +38,19 @@ class AuthController extends Controller
      */
     public function login(): JsonResponse
     {
-        $credentials = request(['email', 'password']);
+        $credentials = request()->only('email', 'password');
 
-        if (! $token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        if (!$token = auth()->attempt($credentials)) {
+            return ApiResponseClass::throw(
+                new Exception('Unauthorized'),
+                'Unauthorized',
+                401
+            );
         }
 
-        return $this->respondWithToken($token);
+        return ApiResponseClass::sendResponse(
+            $this->respondWithToken($token)->original, 'User logged in'
+        );
     }
 
     /**
@@ -59,7 +60,7 @@ class AuthController extends Controller
      */
     public function me(): JsonResponse
     {
-        return response()->json(auth()->user());
+        return ApiResponseClass::sendResponse(auth()->user());
     }
 
     /**
@@ -70,8 +71,7 @@ class AuthController extends Controller
     public function logout(): JsonResponse
     {
         auth()->logout();
-
-        return response()->json(['message' => 'Successfully logged out']);
+        return ApiResponseClass::sendResponse([], 'User logged out');
     }
 
     /**
@@ -81,17 +81,20 @@ class AuthController extends Controller
      */
     public function refresh(): JsonResponse
     {
-        return $this->respondWithToken(auth()->refresh());
+        return ApiResponseClass::sendResponse(
+            $this->respondWithToken(auth()->refresh())->original,
+            'Token refreshed'
+        );
     }
 
     /**
      * Get the token array structure.
      *
-     * @param  string $token
+     * @param string $token
      *
      * @return JsonResponse
      */
-    protected function respondWithToken($token): JsonResponse
+    protected function respondWithToken(string $token): JsonResponse
     {
         return response()->json([
             'access_token' => $token,
