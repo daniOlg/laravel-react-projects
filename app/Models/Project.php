@@ -17,6 +17,7 @@ class Project extends Model
         'status',
         'responsible',
         'amount',
+        'created_by',
     ];
 
 }

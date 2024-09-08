@@ -7,9 +7,11 @@ use App\Http\Requests\ProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Http\Resources\ProjectResource;
 use App\Interfaces\ProjectRepositoryInterface;
+use Exception;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProjectController extends Controller
 {
@@ -23,7 +25,10 @@ class ProjectController extends Controller
     public function index(): JsonResponse
     {
         $data = $this->projectRepositoryInterface->index();
-        return ApiResponseClass::sendResponse(ProjectResource::collection($data), '', 200);
+        return ApiResponseClass::sendResponse(
+            ProjectResource::collection($data),
+            '',
+        );
     }
 
     public function store(ProjectRequest $request): JsonResponse
@@ -35,7 +40,11 @@ class ProjectController extends Controller
             $product = $this->projectRepositoryInterface->store($details);
 
             DB::commit();
-            return ApiResponseClass::sendResponse(new ProjectResource($product), 'Project created successfully', 201);
+            return ApiResponseClass::sendResponse(
+                new ProjectResource($product),
+                'Project created successfully',
+                201
+            );
 
         } catch (HttpResponseException $ex) {
             return ApiResponseClass::rollback($ex);
@@ -44,8 +53,12 @@ class ProjectController extends Controller
 
     public function show($id): JsonResponse
     {
-        $product = $this->projectRepositoryInterface->getById($id);
-        return ApiResponseClass::sendResponse(new ProjectResource($product), '', 200);
+        try {
+            $product = $this->projectRepositoryInterface->getById($id);
+            return ApiResponseClass::sendResponse(new ProjectResource($product));
+        } catch (Exception $ex) {
+            return ApiResponseClass::rollback($ex);
+        }
     }
 
     public function update(UpdateProjectRequest $request, $id): JsonResponse
@@ -61,16 +74,25 @@ class ProjectController extends Controller
                 new ProjectResource($this->projectRepositoryInterface->getById($id)),
                 'Project updated successfully'
             );
-
-        } catch (HttpResponseException $ex) {
+        } catch (Exception $ex) {
             return ApiResponseClass::rollback($ex);
         }
     }
 
     public function destroy($id): JsonResponse
     {
-        $this->projectRepositoryInterface->delete($id);
+        DB::beginTransaction();
 
-        return ApiResponseClass::sendResponse('Project deleted successfully', '', 204);
+        try {
+            $this->projectRepositoryInterface->delete($id);
+            DB::commit();
+            return ApiResponseClass::sendResponse(
+                [],
+                'Project deleted successfully',
+                204
+            );
+        } catch (Exception $ex) {
+            return ApiResponseClass::rollback($ex);
+        }
     }
 }
