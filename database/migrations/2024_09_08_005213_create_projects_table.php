@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('status');
             $table->string('responsible');
             $table->decimal('amount', 10, 2);
+            $table->foreignId('created_by')->constrained('users');
             $table->timestamps();
         });
     }
