@@ -34,6 +34,7 @@ class ProjectController extends Controller
     public function store(ProjectRequest $request): JsonResponse
     {
         $details = $request->validated();
+        $details['created_by'] = auth()->user()->id;
 
         DB::beginTransaction();
         try {
@@ -45,7 +46,6 @@ class ProjectController extends Controller
                 'Project created successfully',
                 201
             );
-
         } catch (HttpResponseException $ex) {
             return ApiResponseClass::rollback($ex);
         }
