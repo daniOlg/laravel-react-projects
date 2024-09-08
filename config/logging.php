@@ -18,7 +18,7 @@ return [
     |
     */
 
-    'default' => env('LOG_CHANNEL', 'stack'),
+    'default' => env('LOG_CHANNEL', 'console'),
 
     /*
     |--------------------------------------------------------------------------
@@ -125,6 +125,17 @@ return [
 
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
+        ],
+
+        'console' => [
+            'driver' => 'monolog',
+            'handler' => StreamHandler::class,
+            'with' => [
+                'stream' => 'php://stdout',
+            ],
+            'formatter' => env('LOG_STDERR_FORMATTER'),
+            'level' => 'debug',
+            'processors' => [PsrLogMessageProcessor::class],
         ],
 
     ],
