@@ -43,7 +43,7 @@ class AuthController extends Controller
         if (!$token = auth()->attempt($credentials)) {
             return ApiResponseClass::throw(
                 new Exception('Unauthorized'),
-                'Unauthorized',
+                'Email or password is incorrect',
                 401
             );
         }
