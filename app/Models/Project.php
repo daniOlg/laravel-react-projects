@@ -8,8 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Project extends Model
 {
-    use HasFactory;
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     protected $fillable = [
         'name',
