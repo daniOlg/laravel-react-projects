@@ -40,3 +40,25 @@ To use PROJECTS - API + WEB, follow these steps:
 
 You can now access the server at [http://localhost:8000](http://localhost:8000)
 
+
+## API Endpoints
+
+### Autenticación
+| Endpoint            | Método | Descripción                                        |
+|---------------------|--------|----------------------------------------------------|
+| /auth/register      | POST   | Registra un nuevo usuario.                         |
+| /auth/login         | POST   | Inicia sesión y genera un token de autenticación.  |
+| /auth/logout        | POST   | Cierra sesión y revoca el token actual.            |
+| /auth/refresh       | POST   | Refresca el token de autenticación.                |
+| /auth/me            | POST   | Obtiene la información del usuario autenticado.    |
+
+### Proyectos
+| Endpoint            | Método | Descripción                                        |
+|---------------------|--------|----------------------------------------------------|
+| /projects           | GET    | Lista todos los proyectos.                         |
+| /projects           | POST   | Crea un nuevo proyecto.                            |
+| /projects/{project} | GET    | Muestra los detalles de un proyecto específico.    |
+| /projects/{project} | PUT    | Actualiza la información de un proyecto existente. |
+| /projects/{project} | DELETE | Elimina un proyecto específico.                    |
+
+
